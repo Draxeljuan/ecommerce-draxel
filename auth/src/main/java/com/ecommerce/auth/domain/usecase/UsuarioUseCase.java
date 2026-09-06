@@ -26,7 +26,7 @@ public class UsuarioUseCase {
             throw new RuntimeException("Es menor de edad");
         }
 
-        // Validación unificada y eficiente con Stream
+        // Validación del resto de campos
         boolean hayCamposIncompletos = Stream.of(
                 usuario.getNombre(),
                 usuario.getEmail(),
@@ -37,6 +37,13 @@ public class UsuarioUseCase {
 
         if (hayCamposIncompletos) {
             throw new IllegalArgumentException("Todos los campos deben estar completos.");
+        }
+
+        // Validación Longitud Pass e email
+        if (usuario.getPass().length() > 12) {
+            throw new IllegalArgumentException("Contraseña excede tamaño permitido");
+        } else if (usuario.getEmail().length() > 30) {
+            throw new IllegalArgumentException("Email excede tamaño permitido");
         }
 
 
