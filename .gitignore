@@ -1,0 +1,23 @@
+# Logs
+logs/
+*.log
+
+# Compiled class files / Maven build outputs
+auth/target/
+target/
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Environment variables
+.env
+
+# Database data volumes
+.postgres_data/
