@@ -1,10 +1,13 @@
 package com.ecommerce.auth.infraestructure.driver_adapters;
 
+import com.ecommerce.auth.domain.exception.UserNotFoundException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,7 +24,9 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
 
     @Override
     public Usuario buscarPorId(String idUsuario) {
-        return null;
+        return usuarioDataJpaRepository.findById(idUsuario)
+                .map(usuarioMapper::toUsuario)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
     }
 
     @Override

@@ -7,10 +7,7 @@ import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/ecommerce/usuario")
@@ -21,16 +18,23 @@ public class UsuarioController {
     private final UsuarioMapper usuarioMapper;
 
     @PostMapping("/save")
-    public ResponseEntity<UsuarioDTO> saveUsuario(@RequestBody UsuarioDTO usuarioDto){
-
+    public ResponseEntity<UsuarioDTO> saveUsuario(@RequestBody UsuarioDTO usuarioDto) {
         Usuario usuario = usuarioMapper.dtoToUsuario(usuarioDto);
+
         Usuario usuarioValidadoGuardado = usuarioUseCase.guardarUsuario(usuario);
 
-        if(usuarioValidadoGuardado.getIdUsuario() != null){
-            UsuarioDTO respuestaDto = usuarioMapper.usuarioToDto(usuarioValidadoGuardado);
-            return new ResponseEntity<>(respuestaDto, HttpStatus.CREATED);
-        }
+        UsuarioDTO respuestaDto = usuarioMapper.usuarioToDto(usuarioValidadoGuardado);
 
-        return new ResponseEntity<>(usuarioMapper.usuarioToDto(usuarioValidadoGuardado), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(respuestaDto, HttpStatus.CREATED);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioDTO> buscarUsuario(@PathVariable String id) {
+        Usuario usuarioBuscado = usuarioUseCase.buscarUsuarioPorId(id);
+
+        UsuarioDTO usuarioDTO = usuarioMapper.usuarioToDto(usuarioBuscado);
+
+        return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+    }
+
 }
