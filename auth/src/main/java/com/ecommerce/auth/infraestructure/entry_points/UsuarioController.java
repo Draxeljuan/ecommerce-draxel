@@ -2,7 +2,7 @@ package com.ecommerce.auth.infraestructure.entry_points;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.usecase.UsuarioUseCase;
-import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioDTO;
+import com.ecommerce.auth.infraestructure.entry_points.dto.UsuarioDTO;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,6 +35,25 @@ public class UsuarioController {
         UsuarioDTO usuarioDTO = usuarioMapper.usuarioToDto(usuarioBuscado);
 
         return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<UsuarioDTO> actualizarUsuario(@RequestBody UsuarioDTO usuarioDTO){
+        Usuario usuario = usuarioMapper.dtoToUsuario(usuarioDTO);
+
+        Usuario usuarioValidadoActualizado = usuarioUseCase.actualizarUsuario(usuario);
+
+        UsuarioDTO respuestaDTO = usuarioMapper.usuarioToDto(usuarioValidadoActualizado);
+
+        return new ResponseEntity<>(respuestaDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminarUsuario(@PathVariable String id) {
+
+        usuarioUseCase.eliminarUsuario(id);
+
+        return new ResponseEntity<>("Usuario con id: " + id + " eliminado", HttpStatus.OK);
     }
 
 }

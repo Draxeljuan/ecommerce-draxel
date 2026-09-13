@@ -1,4 +1,4 @@
-package com.ecommerce.auth.infraestructure.driver_adapters;
+package com.ecommerce.auth.infraestructure.entry_points.dto;
 
 public record UsuarioDTO(
         String idUsuario,

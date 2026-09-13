@@ -2,7 +2,7 @@ package com.ecommerce.auth.infraestructure.mapper;
 
 
 import com.ecommerce.auth.domain.model.Usuario;
-import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioDTO;
+import com.ecommerce.auth.infraestructure.entry_points.dto.UsuarioDTO;
 import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioData;
 import org.springframework.stereotype.Component;
 
