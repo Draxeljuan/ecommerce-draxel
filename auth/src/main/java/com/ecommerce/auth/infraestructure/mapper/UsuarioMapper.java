@@ -3,7 +3,9 @@ package com.ecommerce.auth.infraestructure.mapper;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UsuarioMapper {
 
     public Usuario toUsuario (UsuarioData usuarioData) {
