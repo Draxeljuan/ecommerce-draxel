@@ -38,6 +38,13 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     }
 
     @Override
+    public Usuario buscarPorEmail(String email){
+        return usuarioDataJpaRepository.findByEmail(email)
+                .map(usuarioMapper::toUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario con este email " + email + "no encontrado"));
+    }
+
+    @Override
     public Usuario actualizarUsuario(Usuario usuario) {
         UsuarioData usuarioData = usuarioMapper.toUsuarioData(usuario);
 

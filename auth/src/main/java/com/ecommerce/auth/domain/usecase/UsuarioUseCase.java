@@ -4,6 +4,7 @@ import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -37,6 +38,22 @@ public class UsuarioUseCase {
         }
 
         return usuarioBuscado;
+
+    }
+
+    public String login(String email, String pass){
+
+        if (pass == null && email == null) {
+            throw new IllegalArgumentException("Las credenciales no pueden ser nulas");
+        }
+
+        Usuario usuarioPorAutenticar = usuarioGateway.buscarPorEmail(email);
+
+        if (!Objects.equals(usuarioPorAutenticar.getEmail(), email) || !Objects.equals(usuarioPorAutenticar.getPass(), pass)) {
+            throw new IllegalArgumentException("Credenciales Invalidas");
+        }
+
+        return "Autenticado como " + usuarioPorAutenticar.getNombre();
 
     }
 

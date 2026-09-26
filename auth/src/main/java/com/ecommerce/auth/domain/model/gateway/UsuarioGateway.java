@@ -17,5 +17,6 @@ public interface UsuarioGateway {
 
     void eliminarUsuario(String idUsuario);
 
+    Usuario buscarPorEmail(String email);
 
 }

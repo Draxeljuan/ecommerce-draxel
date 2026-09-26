@@ -40,6 +40,18 @@ public class UsuarioController {
         return new ResponseEntity<>(usuarioValidadoEncontrado, HttpStatus.NOT_FOUND);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody UsuarioData usuarioData){
+        try {
+            String mensajeAuth = usuarioUseCase.login(usuarioData.getEmail(), usuarioData.getPass());
+            return new ResponseEntity<>(mensajeAuth,HttpStatus.OK);
+        } catch (Exception err) {
+            return new ResponseEntity<>(err.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+
+
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id){
         try{
