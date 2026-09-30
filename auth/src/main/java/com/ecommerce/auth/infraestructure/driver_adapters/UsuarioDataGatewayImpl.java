@@ -1,5 +1,6 @@
 package com.ecommerce.auth.infraestructure.driver_adapters;
 
+import com.ecommerce.auth.domain.exception.UserNotFoundException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
@@ -37,6 +38,13 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     @Override
     public void eliminarUsuario(String idUsuario) {
         usuarioDataJpaRepository.deleteById(idUsuario);
+    }
+
+    @Override
+    public Usuario buscarPorEmail(String email) {
+        return usuarioDataJpaRepository.findByEmail(email)
+                .map(usuarioMapper::toUsuario)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con el email: " + email));
     }
 
 }

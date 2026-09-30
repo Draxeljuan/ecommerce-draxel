@@ -2,6 +2,7 @@ package com.ecommerce.auth.infraestructure.entry_points;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.usecase.UsuarioUseCase;
+import com.ecommerce.auth.infraestructure.entry_points.dto.LoginDTO;
 import com.ecommerce.auth.infraestructure.entry_points.dto.UsuarioDTO;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,12 @@ public class UsuarioController {
         UsuarioDTO usuarioDTO = usuarioMapper.usuarioToDto(usuarioBuscado);
 
         return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO){
+        String mensaje = usuarioUseCase.login(loginDTO.email(), loginDTO.pass());
+        return new ResponseEntity<>(mensaje, HttpStatus.OK);
     }
 
     @PutMapping("/update")

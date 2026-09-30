@@ -1,6 +1,7 @@
 package com.ecommerce.auth.infraestructure.exception;
 
 import com.ecommerce.auth.domain.exception.BusinessRuleException;
+import com.ecommerce.auth.domain.exception.InvalidCredentials;
 import com.ecommerce.auth.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,17 @@ import java.time.ZoneId;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentials.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidCredentials(InvalidCredentials ex) {
+        ErrorResponseDTO errorBody = new ErrorResponseDTO(
+                LocalDateTime.now(ZoneId.of("UTC")),
+                HttpStatus.UNAUTHORIZED.value(), // Código 401
+                "Unauthorized",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<ErrorResponseDTO> handleBusinessRuleException(BusinessRuleException ex) {

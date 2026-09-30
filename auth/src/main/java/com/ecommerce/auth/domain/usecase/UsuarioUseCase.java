@@ -1,11 +1,13 @@
 package com.ecommerce.auth.domain.usecase;
 
 import com.ecommerce.auth.domain.exception.BusinessRuleException;
+import com.ecommerce.auth.domain.exception.InvalidCredentials;
 import com.ecommerce.auth.domain.exception.UserNotFoundException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -41,6 +43,25 @@ public class UsuarioUseCase {
         return usuarioBuscado;
 
     }
+
+    public String login(String email, String pass) {
+        if (pass == null || email == null) {
+            throw new BusinessRuleException("Las credenciales no pueden ser nulas");
+        }
+
+        try {
+            Usuario usuarioPorAutenticar = usuarioGateway.buscarPorEmail(email);
+
+            if (usuarioPorAutenticar == null || !Objects.equals(usuarioPorAutenticar.getPass(), pass)) {
+                throw new InvalidCredentials("Credenciales Inválidas");
+            }
+
+            return "Autenticado como " + usuarioPorAutenticar.getNombre();
+        } catch (UserNotFoundException e) {
+            throw new InvalidCredentials("Credenciales Inválidas");
+        }
+    }
+
 
     public Usuario actualizarUsuario(Usuario usuario){
 
