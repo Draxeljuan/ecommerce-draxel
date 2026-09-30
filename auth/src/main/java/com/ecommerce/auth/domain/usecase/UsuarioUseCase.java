@@ -43,7 +43,7 @@ public class UsuarioUseCase {
 
     public String login(String email, String pass){
 
-        if (pass == null && email == null) {
+        if (pass == null || email == null) {
             throw new IllegalArgumentException("Las credenciales no pueden ser nulas");
         }
 
