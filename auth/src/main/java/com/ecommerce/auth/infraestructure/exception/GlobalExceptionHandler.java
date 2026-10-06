@@ -13,16 +13,16 @@ import java.time.ZoneId;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    // TODO: Validar si se sigue usando esta excepcion con la nueva refactorizacion
     @ExceptionHandler(InvalidCredentials.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidCredentials(InvalidCredentials ex) {
         ErrorResponseDTO errorBody = new ErrorResponseDTO(
                 LocalDateTime.now(ZoneId.of("UTC")),
-                HttpStatus.UNAUTHORIZED.value(), // Código 401
+                HttpStatus.OK.value(), // Código 200 ya que fue valido el flujo
                 "Unauthorized",
                 ex.getMessage()
         );
-        return new ResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorBody, HttpStatus.OK);
     }
 
     @ExceptionHandler(BusinessRuleException.class)

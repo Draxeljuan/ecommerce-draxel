@@ -4,10 +4,10 @@ import com.ecommerce.auth.domain.exception.BusinessRuleException;
 import com.ecommerce.auth.domain.exception.InvalidCredentials;
 import com.ecommerce.auth.domain.exception.UserNotFoundException;
 import com.ecommerce.auth.domain.model.Usuario;
+import com.ecommerce.auth.domain.model.gateway.EncrypterGateway;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -15,6 +15,7 @@ public class UsuarioUseCase {
 
     // Se implementa la lógica de negocio de las API
     private final UsuarioGateway usuarioGateway;
+    private final EncrypterGateway encrypterGateway;
 
     // Caso de uso guardar usuario
 
@@ -24,6 +25,9 @@ public class UsuarioUseCase {
         }
 
         Usuario usuarioValidado = validacionesUsuario(usuario);
+
+        String passEncrypt = encrypterGateway.encrypt(usuarioValidado.getPass());
+        usuarioValidado.setPass(passEncrypt);
 
         return usuarioGateway.guardarUsuario(usuarioValidado);
     }
@@ -49,17 +53,19 @@ public class UsuarioUseCase {
             throw new BusinessRuleException("Las credenciales no pueden ser nulas");
         }
 
-        try {
-            Usuario usuarioPorAutenticar = usuarioGateway.buscarPorEmail(email);
+        Usuario usuarioPorAutenticar = usuarioGateway.buscarPorEmail(email);
 
-            if (usuarioPorAutenticar == null || !Objects.equals(usuarioPorAutenticar.getPass(), pass)) {
-                throw new InvalidCredentials("Credenciales Inválidas");
-            }
-
-            return "Autenticado como " + usuarioPorAutenticar.getNombre();
-        } catch (UserNotFoundException e) {
-            throw new InvalidCredentials("Credenciales Inválidas");
+        if (usuarioPorAutenticar.getEmail() == null || usuarioPorAutenticar.getPass() == null) {
+            throw new InvalidCredentials("Usuario no encontrado");
         }
+
+        if (Boolean.TRUE.equals(encrypterGateway.checkPass(pass, usuarioPorAutenticar.getPass()))){
+            return "Autenticado como " + usuarioPorAutenticar.getNombre();
+        } else {
+            return "Credenciales Invalidas";
+        }
+
+
     }
 
 
@@ -119,7 +125,7 @@ public class UsuarioUseCase {
         }
 
         // Validación Longitud Pass e email
-        if (usuarioAValidar.getPass().length() > 12) {
+        if (usuarioAValidar.getPass().length() > 20) { // Longitud en texto plano sin encriptar permitida
             throw new BusinessRuleException("Contraseña excede tamaño permitido");
         } else if (usuarioAValidar.getEmail().length() > 30) {
             throw new BusinessRuleException("Email excede tamaño permitido");

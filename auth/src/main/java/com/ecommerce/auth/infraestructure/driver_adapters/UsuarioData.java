@@ -20,7 +20,7 @@ public class UsuarioData {
     private String nombre;
     @Column(length = 30, nullable = false)
     private String email;
-    @Column(length = 12, nullable = false)
+    @Column(length = 255, nullable = false)
     private String pass;
     private String role;
     private Integer edad;
