@@ -2,6 +2,7 @@ package com.ecommerce.auth.infraestructure.entry_points;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.usecase.UsuarioUseCase;
+import com.ecommerce.auth.infraestructure.driver_adapters.RequestLogin;
 import com.ecommerce.auth.infraestructure.driver_adapters.UsuarioData;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
@@ -41,16 +42,18 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioData usuarioData){
+    public ResponseEntity<String> login(@RequestBody RequestLogin requestLogin){
         try {
-            String mensajeAuth = usuarioUseCase.login(usuarioData.getEmail(), usuarioData.getPass());
+            String mensajeAuth = usuarioUseCase.login(requestLogin.getEmail(), requestLogin.getPass());
             return new ResponseEntity<>(mensajeAuth,HttpStatus.OK);
         } catch (Exception err) {
-            return new ResponseEntity<>(err.getMessage(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(err.getMessage(), HttpStatus.OK);
         }
 
 
     }
+
+    // TODO: Implementar en todos los controladores necesarios los objetos Request o DTO
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id){
