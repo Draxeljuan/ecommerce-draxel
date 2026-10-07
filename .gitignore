@@ -21,3 +21,6 @@ target/
 
 # Database data volumes
 .postgres_data/
+
+# Credenciales pruebas
+credencialesUsuarios.txt

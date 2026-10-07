@@ -1,4 +1,4 @@
-package com.ecommerce.auth.infraestructure.driver_adapters;
+package com.ecommerce.auth.infraestructure.driver_adapters.base_datos;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
@@ -22,18 +22,14 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
 
     @Override
     public void eliminarUsuario(String id) {
-        try {
-            usuarioDataJpaRepository.deleteById(id);
-        } catch (Exception error) {
-            throw new RuntimeException(error.getMessage());
-        }
+        usuarioDataJpaRepository.deleteById(id);
     }
 
     @Override
     public Usuario buscarPorId(String id) {
         return usuarioDataJpaRepository.findById(id)
                 .map(usuarioMapper::toUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElse(null);
 
     }
 
@@ -41,16 +37,12 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     public Usuario buscarPorEmail(String email){
         return usuarioDataJpaRepository.findByEmail(email)
                 .map(usuarioMapper::toUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario con este email " + email + "no encontrado"));
+                .orElse(null);
     }
 
     @Override
     public Usuario actualizarUsuario(Usuario usuario) {
         UsuarioData usuarioData = usuarioMapper.toUsuarioData(usuario);
-
-        if(!usuarioDataJpaRepository.existsById(usuario.getIdUsuario())){
-            throw new RuntimeException("Usuario con id " + usuario.getIdUsuario() + " no existe");
-        }
         return usuarioMapper.toUsuario(usuarioDataJpaRepository.save(usuarioData));
     }
 
