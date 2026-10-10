@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -19,6 +21,7 @@ public class Usuario {
     private String role;
     private Integer edad;
     private String numeroTelefono;
+    private BigDecimal saldo;
 
 
 }

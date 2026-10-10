@@ -1,5 +1,7 @@
 package com.ecommerce.auth.infraestructure.entry_points.dto;
 
+import java.math.BigDecimal;
+
 public record UsuarioDTO(
         String idUsuario,
         String nombre,
@@ -7,5 +9,6 @@ public record UsuarioDTO(
         String pass,
         String role,
         Integer edad,
-        String numeroTelefono
+        String numeroTelefono,
+        BigDecimal saldo
 ) {}

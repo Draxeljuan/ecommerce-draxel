@@ -7,6 +7,7 @@ import com.ecommerce.auth.domain.model.gateway.EncrypterGateway;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -110,6 +111,26 @@ public class UsuarioUseCase {
 
     }
 
+    public Usuario actualizarSaldo(String idUsuario, BigDecimal nuevoSaldo) {
+
+        if (idUsuario == null || nuevoSaldo == null) {
+            throw new ReglaNegocioException("No se puede actualizar saldo si el id o el nuevoSaldo son nulos");
+        }
+
+        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario);
+
+        if (usuarioBuscado == null){
+            throw new RecursoNoEncontradoException("Usuario a actualizar saldo no encontrado");
+        }
+
+        if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ReglaNegocioException("El saldo no puede ser negativo");
+        }
+
+        usuarioBuscado.setSaldo(nuevoSaldo);
+        return usuarioGateway.guardarUsuario(usuarioBuscado);
+    }
+
     private Usuario validacionesUsuario(Usuario usuarioAValidar, String idUsuarioActual){
         // Validación menor de edad
         if (usuarioAValidar.getEdad() == null) {
@@ -129,6 +150,15 @@ public class UsuarioUseCase {
 
         if (hayCamposIncompletos) {
             throw new ReglaNegocioException("Todos los campos deben estar completos.");
+        }
+
+        // Validación Saldo
+        if (usuarioAValidar.getSaldo() != null && usuarioAValidar.getSaldo().compareTo(BigDecimal.ZERO) < 0) {
+            throw new ReglaNegocioException("El saldo no puede ser negativo");
+        }
+        // Si no se entrega saldo en el cuerpo, se asume que es 0
+        if (usuarioAValidar.getSaldo() == null) {
+            usuarioAValidar.setSaldo(BigDecimal.valueOf(0.00));
         }
 
         // Validación Longitud Pass e email

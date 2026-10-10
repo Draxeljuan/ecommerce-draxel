@@ -17,7 +17,8 @@ public class UsuarioMapper {
                 usuarioData.getPass(),
                 usuarioData.getRole(),
                 usuarioData.getEdad(),
-                usuarioData.getNumeroTelefono()
+                usuarioData.getNumeroTelefono(),
+                usuarioData.getSaldo()
         );
     }
 
@@ -29,7 +30,8 @@ public class UsuarioMapper {
                 usuario.getPass(),
                 usuario.getRole(),
                 usuario.getEdad(),
-                usuario.getNumeroTelefono()
+                usuario.getNumeroTelefono(),
+                usuario.getSaldo()
         );
     }
 
@@ -42,7 +44,8 @@ public class UsuarioMapper {
                 dto.pass(),
                 dto.role(),
                 dto.edad(),
-                dto.numeroTelefono()
+                dto.numeroTelefono(),
+                dto.saldo()
         );
     }
 
@@ -52,11 +55,12 @@ public class UsuarioMapper {
                 usuario.getIdUsuario(),
                 usuario.getNombre(),
                 usuario.getEmail(),
-                // usuario.getPass(),
-                null, // Dejo el pass null como una prueba, no se deberia pasar la clave aunque este encriptada
+                usuario.getPass(),
+                // null, // Dejo el pass null como una prueba, no se deberia pasar la clave aunque este encriptada
                 usuario.getRole(),
                 usuario.getEdad(),
-                usuario.getNumeroTelefono()
+                usuario.getNumeroTelefono(),
+                usuario.getSaldo()
         );
     }
 

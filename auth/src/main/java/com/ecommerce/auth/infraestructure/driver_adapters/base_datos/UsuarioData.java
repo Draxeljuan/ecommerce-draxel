@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +28,9 @@ public class UsuarioData {
     private String role;
     private Integer edad;
     private String numeroTelefono;
+    @ColumnDefault("0.00")
+    @Column(name = "saldo", precision = 10, scale = 2)
+    private BigDecimal saldo;
 
 
 }
