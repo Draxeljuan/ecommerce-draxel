@@ -112,23 +112,27 @@ public class UsuarioUseCase {
 
     }
 
-    public Usuario actualizarSaldo(String idUsuario, BigDecimal nuevoSaldo) {
-
-        if (idUsuario == null || nuevoSaldo == null) {
-            throw new ReglaNegocioException("No se puede actualizar saldo si el id o el nuevoSaldo son nulos");
+    public Usuario descontarSaldo(String idUsuario, BigDecimal monto) {
+        if (idUsuario == null || idUsuario.trim().isEmpty() || monto == null) {
+            throw new ReglaNegocioException("El ID de usuario y el monto a descontar son obligatorios");
         }
 
-        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario);
-
-        if (usuarioBuscado == null){
-            throw new RecursoNoEncontradoException("Usuario a actualizar saldo no encontrado");
+        if (monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ReglaNegocioException("El monto a descontar debe ser mayor a cero");
         }
 
-        if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
-            throw new ReglaNegocioException("El saldo no puede ser negativo");
+        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario.trim());
+        if (usuarioBuscado == null) {
+            throw new RecursoNoEncontradoException("Usuario no encontrado para descontar saldo");
         }
 
-        usuarioBuscado.setSaldo(nuevoSaldo);
+        BigDecimal saldoActual = usuarioBuscado.getSaldo() != null ? usuarioBuscado.getSaldo() : BigDecimal.ZERO;
+
+        if (saldoActual.compareTo(monto) < 0) {
+            throw new ReglaNegocioException("Saldo insuficiente. Saldo disponible: " + saldoActual + ", Monto a descontar: " + monto);
+        }
+
+        usuarioBuscado.setSaldo(saldoActual.subtract(monto));
         return usuarioGateway.guardarUsuario(usuarioBuscado);
     }
 

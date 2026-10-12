@@ -3,7 +3,7 @@ package com.ecommerce.catalog.infrastructure.driver_adapters.feign;
 import com.ecommerce.catalog.domain.exception.RecursoNoEncontradoException;
 import com.ecommerce.catalog.domain.exception.ReglaNegocioException;
 import com.ecommerce.catalog.domain.model.gateway.UsuarioAuthGateway;
-import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.ActualizarSaldoDTO;
+import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.DescontarSaldoDTO;
 import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.UsuarioResponseDTO;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -45,13 +45,13 @@ public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
     }
 
     @Override
-    public void actualizarSaldo(String idUsuario, BigDecimal nuevoSaldo) {
+    public void descontarSaldo(String idUsuario, BigDecimal monto) {
         try {
-            usuarioAuthFeignClient.actualizarSaldo(new ActualizarSaldoDTO(idUsuario, nuevoSaldo));
+            usuarioAuthFeignClient.descontarSaldo(new DescontarSaldoDTO(idUsuario, monto));
         } catch (FeignException.NotFound e) {
-            throw new RecursoNoEncontradoException("Usuario no encontrado para actualizar saldo: " + idUsuario);
+            throw new RecursoNoEncontradoException("Usuario no encontrado para descontar saldo: " + idUsuario);
         } catch (FeignException e) {
-            throw new ReglaNegocioException("Error al actualizar saldo en el servicio de autenticación: " + e.getMessage());
+            throw new ReglaNegocioException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
     }
 }

@@ -154,6 +154,7 @@ public class CarritoUseCase {
         BigDecimal total = BigDecimal.ZERO;
         List<Producto> productosActualizados = new ArrayList<>();
 
+        // Validamos stock y calculamos total
         for (ItemCarrito item : items) {
             Producto producto = productoGateway.buscarPorId(item.getIdProducto());
             if (producto == null) {
@@ -172,6 +173,7 @@ public class CarritoUseCase {
             productosActualizados.add(producto);
         }
 
+        // Validamos el saldo del usuario
         BigDecimal saldoUsuario = usuarioAuthGateway.obtenerSaldoUsuario(carrito.getIdUsuario());
         if (saldoUsuario == null) {
             throw new ReglaNegocioException("No se pudo verificar el saldo del usuario");
@@ -181,13 +183,15 @@ public class CarritoUseCase {
             throw new ReglaNegocioException("Saldo insuficiente. Saldo actual: " + saldoUsuario + ", Total compra: " + total);
         }
 
+        // Actualización de Saldo (Cobro)
+        usuarioAuthGateway.descontarSaldo(carrito.getIdUsuario(), total);
+
+        // Actualizar Stock (Persistir cambios)
         for (Producto prod : productosActualizados) {
             productoGateway.actualizarProducto(prod);
         }
 
-        BigDecimal nuevoSaldo = saldoUsuario.subtract(total);
-        usuarioAuthGateway.actualizarSaldo(carrito.getIdUsuario(), nuevoSaldo);
-
+        // Guardar carrito como vendido
         carrito.setEstado("VENDIDO");
         Carrito carritoVendido = carritoGateway.guardarCarrito(carrito);
         carritoVendido.setItems(items);

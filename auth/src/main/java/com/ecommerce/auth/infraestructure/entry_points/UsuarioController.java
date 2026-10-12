@@ -2,8 +2,8 @@ package com.ecommerce.auth.infraestructure.entry_points;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.usecase.UsuarioUseCase;
+import com.ecommerce.auth.infraestructure.entry_points.dto.DescontarSaldoDTO;
 import com.ecommerce.auth.infraestructure.entry_points.dto.LoginDTO;
-import com.ecommerce.auth.infraestructure.entry_points.dto.SaldoDTO;
 import com.ecommerce.auth.infraestructure.entry_points.dto.UsuarioDTO;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
@@ -51,10 +51,11 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioMapper.usuarioToDto(usuarioValidadoActualizado));
     }
 
-    @PutMapping("/saldo")
-    public ResponseEntity<UsuarioDTO> updateSaldo(@RequestBody SaldoDTO saldoDTO){
-        Usuario usuarioConSaldoActualizado = usuarioUseCase.actualizarSaldo(saldoDTO.idUsuario(), saldoDTO.saldo());
-        return ResponseEntity.ok(usuarioMapper.usuarioToDto(usuarioConSaldoActualizado));
+
+    @PutMapping("/descontar-saldo")
+    public ResponseEntity<UsuarioDTO> descontarSaldo(@RequestBody DescontarSaldoDTO dto) {
+        Usuario usuarioConSaldoDescontado = usuarioUseCase.descontarSaldo(dto.idUsuario(), dto.monto());
+        return ResponseEntity.ok(usuarioMapper.usuarioToDto(usuarioConSaldoDescontado));
     }
 
 
