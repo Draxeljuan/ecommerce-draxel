@@ -1,5 +1,6 @@
 package com.ecommerce.auth.domain.usecase;
 
+import com.ecommerce.auth.domain.exception.CredencialesInvalidasException;
 import com.ecommerce.auth.domain.exception.RecursoNoEncontradoException;
 import com.ecommerce.auth.domain.exception.ReglaNegocioException;
 import com.ecommerce.auth.domain.model.Usuario;
@@ -58,11 +59,11 @@ public class UsuarioUseCase {
         Usuario usuarioPorAutenticar = usuarioGateway.buscarPorEmail(email);
 
         if (usuarioPorAutenticar == null) {
-            throw new RecursoNoEncontradoException("Credenciales Invalidas");
+            throw new CredencialesInvalidasException("Credenciales Invalidas");
         }
 
         if (usuarioPorAutenticar.getEmail() == null || usuarioPorAutenticar.getPass() == null) {
-            throw new RecursoNoEncontradoException("Credenciales Invalidas");
+            throw new CredencialesInvalidasException("Credenciales Invalidas");
         }
 
         if (Boolean.TRUE.equals(encrypterGateway.checkPass(pass, usuarioPorAutenticar.getPass()))){

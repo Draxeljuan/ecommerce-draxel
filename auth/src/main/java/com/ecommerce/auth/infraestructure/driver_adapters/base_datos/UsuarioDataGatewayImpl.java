@@ -1,9 +1,11 @@
 package com.ecommerce.auth.infraestructure.driver_adapters.base_datos;
 
+import com.ecommerce.auth.domain.exception.ReglaNegocioException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import com.ecommerce.auth.infraestructure.mapper.UsuarioMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 
@@ -22,7 +24,12 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
 
     @Override
     public void eliminarUsuario(String id) {
-        usuarioDataJpaRepository.deleteById(id);
+        try {
+            usuarioDataJpaRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e){
+            throw new ReglaNegocioException("No se puede eliminar el usuario porque tiene " +
+                    "carritos/compras asociadas en el sistema");
+        }
     }
 
     @Override

@@ -24,3 +24,9 @@ target/
 
 # Credenciales pruebas
 credencialesUsuarios.txt
+
+# Schema Prueba
+schema.sql
+
+# Agents
+AGENTS.md
