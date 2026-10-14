@@ -3,6 +3,7 @@ package com.ecommerce.auth.infraestructure.mapper;
 
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.infraestructure.driver_adapters.base_datos.UsuarioData;
+import com.ecommerce.auth.infraestructure.entry_points.dto.SaldoActualizadoDTO;
 import com.ecommerce.auth.infraestructure.entry_points.dto.UsuarioDTO;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +61,16 @@ public class UsuarioMapper {
                 usuario.getRole(),
                 usuario.getEdad(),
                 usuario.getNumeroTelefono(),
+                usuario.getSaldo()
+        );
+    }
+
+    public SaldoActualizadoDTO usuarioToSaldoActualizadoDto(Usuario usuario) {
+        if (usuario == null) {
+            return null;
+        }
+        return new SaldoActualizadoDTO(
+                usuario.getNombre(),
                 usuario.getSaldo()
         );
     }

@@ -95,8 +95,8 @@ public class ProductoUseCase {
         if (producto.getPrecio().scale() > 2) {
             throw new ReglaNegocioException("El precio no puede tener más de 2 decimales");
         }
-        if (producto.getStock() == null || producto.getStock() < 0) {
-            throw new ReglaNegocioException("El stock del producto no puede ser negativo o nulo");
+        if (producto.getStock() == null || producto.getStock() <= 0) {
+            throw new ReglaNegocioException("El stock del producto no puede ser negativo, cero o nulo");
         }
     }
 
