@@ -6,12 +6,9 @@ import com.ecommerce.catalog.infrastructure.entry_points.dto.AgregarItemDTO;
 import com.ecommerce.catalog.infrastructure.entry_points.dto.CarritoDTO;
 import com.ecommerce.catalog.infrastructure.entry_points.dto.CheckoutResponseDTO;
 import com.ecommerce.catalog.infrastructure.mapper.CarritoMapper;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/ecommerce/carrito")
@@ -23,7 +20,7 @@ public class CarritoController {
 
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<CarritoDTO> obtenerCarritoActivoPorUsuario(@PathVariable String idUsuario) {
-        Carrito carrito = carritoUseCase.obtenerOCrearCarritoActivo(idUsuario);
+        Carrito carrito = carritoUseCase.obtenerCarritoActivoPorUsuario(idUsuario);
         return ResponseEntity.ok(carritoMapper.carritoToDto(carrito));
     }
 
@@ -34,7 +31,7 @@ public class CarritoController {
     }
 
     @PostMapping("/item")
-    public ResponseEntity<CarritoDTO> agregarItem(@RequestBody @Valid AgregarItemDTO dto) {
+    public ResponseEntity<CarritoDTO> agregarItem(@RequestBody AgregarItemDTO dto) {
         Carrito carritoActualizado = carritoUseCase.agregarItem(dto.idUsuario(), dto.idProducto(), dto.cantidad());
         return ResponseEntity.ok(carritoMapper.carritoToDto(carritoActualizado));
     }
@@ -45,9 +42,9 @@ public class CarritoController {
         return ResponseEntity.ok().body("Item " + idItem + " eliminado del carrito " + idCarrito);
     }
 
-    @PostMapping("/{idCarrito}/checkout")
-    public ResponseEntity<CheckoutResponseDTO> checkout(@PathVariable String idCarrito) {
-        Carrito carritoVendido = carritoUseCase.checkout(idCarrito);
+    @PostMapping("/checkout/{idUsuario}")
+    public ResponseEntity<CheckoutResponseDTO> checkout(@PathVariable String idUsuario) {
+        Carrito carritoVendido = carritoUseCase.checkout(idUsuario);
 
         return ResponseEntity.ok(
                 carritoMapper.toCheckoutResponseDto(carritoVendido, "Compra realizada exitosamente y saldo descontado")

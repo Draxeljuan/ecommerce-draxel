@@ -29,7 +29,7 @@ public class UsuarioData {
     private Integer edad;
     private String numeroTelefono;
     @ColumnDefault("0.00")
-    @Column(name = "saldo", precision = 10, scale = 2)
+    @Column(name = "saldo", precision = 20, scale = 2)
     private BigDecimal saldo;
 
 

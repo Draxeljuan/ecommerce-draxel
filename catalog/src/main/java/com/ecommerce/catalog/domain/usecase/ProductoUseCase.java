@@ -18,6 +18,8 @@ public class ProductoUseCase {
 
     private final ProductoGateway productoGateway;
 
+    private static final BigDecimal MAX_PRECIO = new BigDecimal("999999999999999999.99");
+
     public Producto guardarProducto(Producto producto) {
         if (producto == null) {
             throw new ReglaNegocioException("El producto no puede ser nulo");
@@ -94,6 +96,9 @@ public class ProductoUseCase {
         }
         if (producto.getPrecio().scale() > 2) {
             throw new ReglaNegocioException("El precio no puede tener más de 2 decimales");
+        }
+        if (producto.getPrecio().compareTo(MAX_PRECIO) > 0) {
+            throw new ReglaNegocioException("Precio de producto inválido, valor demasiado alto para el comercio");
         }
         if (producto.getStock() == null || producto.getStock() <= 0) {
             throw new ReglaNegocioException("El stock del producto no puede ser negativo, cero o nulo");

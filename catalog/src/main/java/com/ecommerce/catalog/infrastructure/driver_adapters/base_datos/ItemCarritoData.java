@@ -32,6 +32,6 @@ public class ItemCarritoData {
     @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
 
-    @Column(name = "precio_unitario", precision = 10, scale = 2, nullable = false)
+    @Column(name = "precio_unitario", precision = 20, scale = 2, nullable = false)
     private BigDecimal precioUnitario;
 }

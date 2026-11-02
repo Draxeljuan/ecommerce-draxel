@@ -25,34 +25,27 @@ public class CarritoUseCase {
     private final UsuarioAuthGateway usuarioAuthGateway;
 
     private static final String ACTIVO = "ACTIVO";
+    private static final String VENDIDO = "VENDIDO";
 
-    public Carrito obtenerOCrearCarritoActivo(String idUsuario) {
+    public Carrito obtenerCarritoActivoPorUsuario(String idUsuario) {
         if (idUsuario == null || idUsuario.trim().isEmpty()) {
             throw new ReglaNegocioException("El ID de usuario no puede ser nulo o vacío");
         }
 
+        String idUsuarioLimpio = idUsuario.trim();
+
         // Validación de si existe el usuario antes de buscarle un carrito
-        if (!usuarioAuthGateway.existeUsuario(idUsuario)) {
-            throw new RecursoNoEncontradoException("No se pudo encontrar el usuario con id: " + idUsuario);
+        if (!usuarioAuthGateway.existeUsuario(idUsuarioLimpio)) {
+            throw new RecursoNoEncontradoException("No se pudo encontrar el usuario con id: " + idUsuarioLimpio);
         }
 
-        Carrito carritoActivo = carritoGateway.buscarActivoPorUsuario(idUsuario);
-
-
-        if (carritoActivo != null) {
-            carritoActivo.setItems(carritoGateway.buscarItemsPorCarrito(carritoActivo.getIdCarrito()));
-            return carritoActivo;
+        Carrito carritoActivo = carritoGateway.buscarActivoPorUsuario(idUsuarioLimpio);
+        if (carritoActivo == null) {
+            throw new RecursoNoEncontradoException("El usuario con id " + idUsuarioLimpio + " no tiene un carrito activo");
         }
 
-        Carrito nuevoCarrito = Carrito.builder()
-                .idCarrito(generarIdCarrito())
-                .idUsuario(idUsuario)
-                .estado(ACTIVO)
-                .fechaCreacion(LocalDateTime.now(ZoneId.systemDefault()))
-                .items(new ArrayList<>())
-                .build();
-
-        return carritoGateway.guardarCarrito(nuevoCarrito);
+        carritoActivo.setItems(carritoGateway.buscarItemsPorCarrito(carritoActivo.getIdCarrito()));
+        return carritoActivo;
     }
 
     public Carrito buscarPorId(String idCarrito) {
@@ -60,12 +53,12 @@ public class CarritoUseCase {
             throw new ReglaNegocioException("El ID del carrito no puede ser nulo o vacío");
         }
 
-        Carrito carrito = carritoGateway.buscarPorId(idCarrito);
+        Carrito carrito = carritoGateway.buscarPorId(idCarrito.trim());
         if (carrito == null) {
             throw new RecursoNoEncontradoException("Carrito no encontrado con ID: " + idCarrito);
         }
 
-        carrito.setItems(carritoGateway.buscarItemsPorCarrito(idCarrito));
+        carrito.setItems(carritoGateway.buscarItemsPorCarrito(carrito.getIdCarrito()));
         return carrito;
     }
 
@@ -80,14 +73,24 @@ public class CarritoUseCase {
             throw new ReglaNegocioException("La cantidad debe ser mayor a cero");
         }
 
-        Producto producto = productoGateway.buscarPorId(idProducto);
-        if (producto == null) {
-            throw new RecursoNoEncontradoException("Producto no encontrado con ID: " + idProducto);
+        String idUsuarioLimpio = idUsuario.trim();
+        String idProductoLimpio = idProducto.trim();
+
+        if (!usuarioAuthGateway.existeUsuario(idUsuarioLimpio)) {
+            throw new RecursoNoEncontradoException("No se pudo encontrar el usuario con id: " + idUsuarioLimpio);
         }
 
-        Carrito carrito = obtenerOCrearCarritoActivo(idUsuario);
+        Producto producto = productoGateway.buscarPorId(idProductoLimpio);
+        if (producto == null) {
+            throw new RecursoNoEncontradoException("Producto no encontrado con ID: " + idProductoLimpio);
+        }
 
-        ItemCarrito itemExistente = carritoGateway.buscarItemPorCarritoYProducto(carrito.getIdCarrito(), idProducto);
+        Carrito carrito = carritoGateway.buscarActivoPorUsuario(idUsuarioLimpio);
+        if (carrito == null) {
+            carrito = crearCarritoActivo(idUsuarioLimpio);
+        }
+
+        ItemCarrito itemExistente = carritoGateway.buscarItemPorCarritoYProducto(carrito.getIdCarrito(), idProductoLimpio);
 
         if (itemExistente != null) {
             int nuevaCantidad = itemExistente.getCantidad() + cantidad;
@@ -104,7 +107,7 @@ public class CarritoUseCase {
             ItemCarrito nuevoItem = ItemCarrito.builder()
                     .idItem(generarIdItem())
                     .idCarrito(carrito.getIdCarrito())
-                    .idProducto(idProducto)
+                    .idProducto(idProductoLimpio)
                     .cantidad(cantidad)
                     .precioUnitario(producto.getPrecio())
                     .build();
@@ -122,29 +125,28 @@ public class CarritoUseCase {
             throw new ReglaNegocioException("El ID del ítem es obligatorio");
         }
 
-        Carrito carrito = buscarPorId(idCarrito);
+        String idCarritoLimpio = idCarrito.trim();
+        String idItemLimpio = idItem.trim();
+
+        Carrito carrito = buscarPorId(idCarritoLimpio);
         if (!ACTIVO.equalsIgnoreCase(carrito.getEstado())) {
             throw new ReglaNegocioException("No se pueden eliminar ítems de un carrito que no esté ACTIVO");
         }
 
-        ItemCarrito item = carritoGateway.buscarItemPorId(idItem);
-        if (item == null || !idCarrito.equals(item.getIdCarrito())) {
+        ItemCarrito item = carritoGateway.buscarItemPorId(idItemLimpio);
+        if (item == null || !idCarritoLimpio.equals(item.getIdCarrito())) {
             throw new RecursoNoEncontradoException("El ítem no pertenece al carrito especificado");
         }
 
-        carritoGateway.eliminarItem(idItem);
+        carritoGateway.eliminarItem(idItemLimpio);
     }
 
-    public Carrito checkout(String idCarrito) {
-        if (idCarrito == null || idCarrito.trim().isEmpty()) {
-            throw new ReglaNegocioException("El ID del carrito es obligatorio");
+    public Carrito checkout(String idUsuario) {
+        if (idUsuario == null || idUsuario.trim().isEmpty()) {
+            throw new ReglaNegocioException("El ID de usuario es obligatorio");
         }
 
-        Carrito carrito = buscarPorId(idCarrito);
-
-        if (!ACTIVO.equalsIgnoreCase(carrito.getEstado())) {
-            throw new ReglaNegocioException("Solo se puede realizar checkout en carritos con estado ACTIVO");
-        }
+        Carrito carrito = obtenerCarritoActivoPorUsuario(idUsuario.trim());
 
         List<ItemCarrito> items = carrito.getItems();
         if (items == null || items.isEmpty()) {
@@ -192,11 +194,23 @@ public class CarritoUseCase {
         }
 
         // Guardar carrito como vendido
-        carrito.setEstado("VENDIDO");
+        carrito.setEstado(VENDIDO);
         Carrito carritoVendido = carritoGateway.guardarCarrito(carrito);
         carritoVendido.setItems(items);
 
         return carritoVendido;
+    }
+
+    private Carrito crearCarritoActivo(String idUsuario) {
+        Carrito nuevoCarrito = Carrito.builder()
+                .idCarrito(generarIdCarrito())
+                .idUsuario(idUsuario)
+                .estado(ACTIVO)
+                .fechaCreacion(LocalDateTime.now(ZoneId.systemDefault()))
+                .items(new ArrayList<>())
+                .build();
+
+        return carritoGateway.guardarCarrito(nuevoCarrito);
     }
 
     private String generarIdCarrito() {

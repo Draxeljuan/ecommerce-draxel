@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/ecommerce/usuario")
 @RequiredArgsConstructor
@@ -28,6 +30,16 @@ public class UsuarioController {
     public ResponseEntity<UsuarioDTO> findByIdUsuario(@PathVariable String id){
         Usuario usuario = usuarioUseCase.buscarUsuarioPorId(id);
         return ResponseEntity.ok(usuarioMapper.usuarioToDto(usuario));
+    }
+
+    @GetMapping("/{id}/existe")
+    public ResponseEntity<Boolean> existeUsuario(@PathVariable String id) {
+        return ResponseEntity.ok(usuarioUseCase.existeUsuarioPorId(id));
+    }
+
+    @GetMapping("/{id}/saldo")
+    public ResponseEntity<BigDecimal> consultarSaldo(@PathVariable String id) {
+        return ResponseEntity.ok(usuarioUseCase.consultarSaldo(id));
     }
 
     @PostMapping("/login")
@@ -56,10 +68,9 @@ public class UsuarioController {
     }
 
     @PutMapping("/descontar-saldo")
-    public ResponseEntity<UsuarioDTO> descontarSaldo(@RequestBody DescontarSaldoDTO dto) {
-        Usuario usuarioConSaldoDescontado = usuarioUseCase.descontarSaldo(dto.idUsuario(), dto.monto());
-        return ResponseEntity.ok(usuarioMapper.usuarioToDto(usuarioConSaldoDescontado));
+    public ResponseEntity<Void> descontarSaldo(@RequestBody DescontarSaldoDTO dto) {
+        usuarioUseCase.descontarSaldo(dto.idUsuario(), dto.monto());
+        return ResponseEntity.noContent().build();
     }
-
 
 }

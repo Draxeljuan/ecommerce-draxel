@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "productos")
@@ -30,7 +27,7 @@ public class ProductoData {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "precio", precision = 10, scale = 2, nullable = false)
+    @Column(name = "precio", precision = 20, scale = 2, nullable = false)
     private BigDecimal precio;
 
     @Column(name = "stock", nullable = false)

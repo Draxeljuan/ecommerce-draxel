@@ -41,6 +41,11 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     }
 
     @Override
+    public boolean existePorId(String id) {
+        return usuarioDataJpaRepository.existsById(id);
+    }
+
+    @Override
     public Usuario buscarPorEmail(String email){
         return usuarioDataJpaRepository.findByEmail(email)
                 .map(usuarioMapper::toUsuario)

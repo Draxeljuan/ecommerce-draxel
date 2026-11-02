@@ -4,7 +4,6 @@ import com.ecommerce.catalog.domain.exception.RecursoNoEncontradoException;
 import com.ecommerce.catalog.domain.exception.ReglaNegocioException;
 import com.ecommerce.catalog.domain.model.gateway.UsuarioAuthGateway;
 import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.DescontarSaldoDTO;
-import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.UsuarioResponseDTO;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,10 +19,11 @@ public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
     @Override
     public boolean existeUsuario(String idUsuario) {
         try {
-            UsuarioResponseDTO usuario = usuarioAuthFeignClient.buscarUsuarioPorId(idUsuario);
-            return usuario != null;
+            return Boolean.TRUE.equals(usuarioAuthFeignClient.existeUsuario(idUsuario));
         } catch (FeignException.NotFound e) {
             return false;
+        } catch (FeignException.BadRequest e) {
+            throw new ReglaNegocioException(extraerMensaje(e, "Datos inválidos al verificar existencia de usuario"));
         } catch (FeignException e) {
             throw new ReglaNegocioException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
@@ -32,13 +32,15 @@ public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
     @Override
     public BigDecimal obtenerSaldoUsuario(String idUsuario) {
         try {
-            UsuarioResponseDTO usuario = usuarioAuthFeignClient.buscarUsuarioPorId(idUsuario);
-            if (usuario == null || usuario.saldo() == null) {
-                throw new RecursoNoEncontradoException("Usuario no encontrado en el servicio de autenticación");
+            BigDecimal saldo = usuarioAuthFeignClient.obtenerSaldo(idUsuario);
+            if (saldo == null) {
+                throw new RecursoNoEncontradoException("No se encontró saldo para el usuario con ID: " + idUsuario);
             }
-            return usuario.saldo();
+            return saldo;
         } catch (FeignException.NotFound e) {
             throw new RecursoNoEncontradoException("Usuario no encontrado con ID: " + idUsuario);
+        } catch (FeignException.BadRequest e) {
+            throw new ReglaNegocioException(extraerMensaje(e, "Datos inválidos al consultar saldo del usuario"));
         } catch (FeignException e) {
             throw new ReglaNegocioException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
@@ -50,8 +52,15 @@ public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
             usuarioAuthFeignClient.descontarSaldo(new DescontarSaldoDTO(idUsuario, monto));
         } catch (FeignException.NotFound e) {
             throw new RecursoNoEncontradoException("Usuario no encontrado para descontar saldo: " + idUsuario);
+        } catch (FeignException.BadRequest e) {
+            throw new ReglaNegocioException(extraerMensaje(e, "No fue posible descontar el saldo del usuario"));
         } catch (FeignException e) {
             throw new ReglaNegocioException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
         }
+    }
+
+    private String extraerMensaje(FeignException e, String mensajePorDefecto) {
+        String cuerpo = e.contentUTF8();
+        return (cuerpo != null && !cuerpo.isBlank()) ? cuerpo : mensajePorDefecto;
     }
 }

@@ -13,6 +13,8 @@ public interface UsuarioGateway {
 
     Usuario buscarPorId(String idUsuario);
 
+    boolean existePorId(String idUsuario);
+
     Usuario actualizarUsuario (Usuario usuario);
 
     void eliminarUsuario(String idUsuario);

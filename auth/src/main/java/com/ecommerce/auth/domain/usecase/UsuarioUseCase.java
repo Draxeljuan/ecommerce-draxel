@@ -19,6 +19,8 @@ public class UsuarioUseCase {
     private final UsuarioGateway usuarioGateway;
     private final EncrypterGateway encrypterGateway;
 
+    private static final BigDecimal MAX_VALOR_MONETARIO = new BigDecimal("999999999999999999.99");
+
     // Caso de uso guardar usuario
 
     public Usuario guardarUsuario(Usuario usuario) {
@@ -40,7 +42,7 @@ public class UsuarioUseCase {
             throw new ReglaNegocioException("El id no puede ser nulo");
         }
 
-        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario);
+        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario.trim());
 
         if (usuarioBuscado == null){
             throw new RecursoNoEncontradoException("Usuario no encontrado");
@@ -48,6 +50,18 @@ public class UsuarioUseCase {
 
         return usuarioBuscado;
 
+    }
+
+    public boolean existeUsuarioPorId(String idUsuario) {
+        if (idUsuario == null || idUsuario.trim().isEmpty()) {
+            throw new ReglaNegocioException("El id no puede ser nulo");
+        }
+        return usuarioGateway.existePorId(idUsuario.trim());
+    }
+
+    public BigDecimal consultarSaldo(String idUsuario) {
+        Usuario usuario = buscarUsuarioPorId(idUsuario);
+        return usuario.getSaldo() != null ? usuario.getSaldo() : BigDecimal.ZERO;
     }
 
     public String login(String email, String pass){
@@ -111,28 +125,29 @@ public class UsuarioUseCase {
         usuarioGateway.eliminarUsuario(idUsuario);
 
     }
-
     public Usuario actualizarSaldo(String idUsuario, BigDecimal nuevoSaldo) {
 
-        if (idUsuario == null || nuevoSaldo == null) {
+        if (idUsuario == null || idUsuario.trim().isEmpty() || nuevoSaldo == null) {
             throw new ReglaNegocioException("No se puede actualizar saldo si el id o el nuevoSaldo son nulos");
-        }
-
-        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario);
-
-        if (usuarioBuscado == null){
-            throw new RecursoNoEncontradoException("Usuario a actualizar saldo no encontrado");
         }
 
         if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
             throw new ReglaNegocioException("El saldo no puede ser negativo");
         }
 
+        validarMontoMonetario(nuevoSaldo, "saldo");
+
+        Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario.trim());
+
+        if (usuarioBuscado == null){
+            throw new RecursoNoEncontradoException("Usuario a actualizar saldo no encontrado");
+        }
+
         usuarioBuscado.setSaldo(nuevoSaldo);
         return usuarioGateway.guardarUsuario(usuarioBuscado);
     }
 
-    public Usuario descontarSaldo(String idUsuario, BigDecimal monto) {
+    public void descontarSaldo(String idUsuario, BigDecimal monto) {
         if (idUsuario == null || idUsuario.trim().isEmpty() || monto == null) {
             throw new ReglaNegocioException("El ID de usuario y el monto a descontar son obligatorios");
         }
@@ -140,6 +155,8 @@ public class UsuarioUseCase {
         if (monto.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ReglaNegocioException("El monto a descontar debe ser mayor a cero");
         }
+
+        validarMontoMonetario(monto, "monto a descontar");
 
         Usuario usuarioBuscado = usuarioGateway.buscarPorId(idUsuario.trim());
         if (usuarioBuscado == null) {
@@ -153,7 +170,7 @@ public class UsuarioUseCase {
         }
 
         usuarioBuscado.setSaldo(saldoActual.subtract(monto));
-        return usuarioGateway.guardarUsuario(usuarioBuscado);
+        usuarioGateway.guardarUsuario(usuarioBuscado);
     }
 
     private Usuario validacionesUsuario(Usuario usuarioAValidar, String idUsuarioActual){
@@ -186,6 +203,8 @@ public class UsuarioUseCase {
             usuarioAValidar.setSaldo(BigDecimal.valueOf(0.00));
         }
 
+        validarMontoMonetario(usuarioAValidar.getSaldo(), "saldo");
+
         // Validación Longitud Pass e email
         if (usuarioAValidar.getPass().length() > 20) {
             throw new ReglaNegocioException("Contraseña excede tamaño permitido");
@@ -201,6 +220,15 @@ public class UsuarioUseCase {
 
 
         return usuarioAValidar;
+    }
+
+    private void validarMontoMonetario(BigDecimal valor, String nombreCampo) {
+        if (valor.scale() > 2) {
+            throw new ReglaNegocioException("El " + nombreCampo + " no puede tener más de 2 decimales");
+        }
+        if (valor.compareTo(MAX_VALOR_MONETARIO) > 0) {
+            throw new ReglaNegocioException("El " + nombreCampo + " excede el límite máximo permitido");
+        }
     }
 
 }
