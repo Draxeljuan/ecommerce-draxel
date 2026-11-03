@@ -1,6 +1,7 @@
 package com.ecommerce.catalog.infrastructure.driver_adapters.feign;
 
 import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.DescontarSaldoDTO;
+import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.UsuarioContactoDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,4 +21,7 @@ public interface UsuarioAuthFeignClient {
 
     @PutMapping("/api/ecommerce/usuario/descontar-saldo")
     void descontarSaldo(@RequestBody DescontarSaldoDTO dto);
+
+    @GetMapping("/api/ecommerce/usuario/{id}/contacto")
+    UsuarioContactoDTO obtenerContacto(@PathVariable("id") String id);
 }

@@ -5,7 +5,9 @@ import com.ecommerce.catalog.domain.exception.ReglaNegocioException;
 import com.ecommerce.catalog.domain.model.Carrito;
 import com.ecommerce.catalog.domain.model.ItemCarrito;
 import com.ecommerce.catalog.domain.model.Producto;
+import com.ecommerce.catalog.domain.model.UsuarioContacto;
 import com.ecommerce.catalog.domain.model.gateway.CarritoGateway;
+import com.ecommerce.catalog.domain.model.gateway.NotificacionGateway;
 import com.ecommerce.catalog.domain.model.gateway.ProductoGateway;
 import com.ecommerce.catalog.domain.model.gateway.UsuarioAuthGateway;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class CarritoUseCase {
     private final CarritoGateway carritoGateway;
     private final ProductoGateway productoGateway;
     private final UsuarioAuthGateway usuarioAuthGateway;
+    private final NotificacionGateway notificacionGateway;
 
     private static final String ACTIVO = "ACTIVO";
     private static final String VENDIDO = "VENDIDO";
@@ -197,6 +200,26 @@ public class CarritoUseCase {
         carrito.setEstado(VENDIDO);
         Carrito carritoVendido = carritoGateway.guardarCarrito(carrito);
         carritoVendido.setItems(items);
+
+        // Notificación del resumen de compra (Resiliente)
+        try {
+            UsuarioContacto contacto = usuarioAuthGateway.obtenerContactoUsuario(carrito.getIdUsuario());
+            String nombreCliente = (contacto != null && contacto.nombre() != null) ? contacto.nombre() : "Cliente";
+            String emailCliente = (contacto != null) ? contacto.email() : null;
+            String telefonoCliente = (contacto != null) ? contacto.telefono() : null;
+
+            String resumen = String.format(
+                    "¡Hola %s! Tu compra en E-commerce fue exitosa. Carrito: %s. Total: $%s. Items adquiridos: %d.",
+                    nombreCliente,
+                    carritoVendido.getIdCarrito(),
+                    total,
+                    items.size()
+            );
+
+            notificacionGateway.enviarNotificacion(emailCliente, telefonoCliente, resumen);
+        } catch (Exception e) {
+            // Resiliencia: Si la notificación falla, la compra finaliza exitosamente
+        }
 
         return carritoVendido;
     }

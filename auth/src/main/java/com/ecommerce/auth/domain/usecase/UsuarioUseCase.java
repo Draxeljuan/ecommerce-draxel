@@ -5,6 +5,7 @@ import com.ecommerce.auth.domain.exception.RecursoNoEncontradoException;
 import com.ecommerce.auth.domain.exception.ReglaNegocioException;
 import com.ecommerce.auth.domain.model.Usuario;
 import com.ecommerce.auth.domain.model.gateway.EncrypterGateway;
+import com.ecommerce.auth.domain.model.gateway.NotificacionGateway;
 import com.ecommerce.auth.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ public class UsuarioUseCase {
     // Se implementa la lógica de negocio de las API
     private final UsuarioGateway usuarioGateway;
     private final EncrypterGateway encrypterGateway;
+    private final NotificacionGateway notificacionGateway;
 
     private static final BigDecimal MAX_VALOR_MONETARIO = new BigDecimal("999999999999999999.99");
 
@@ -27,6 +29,10 @@ public class UsuarioUseCase {
         if (usuario == null) {
             throw new ReglaNegocioException("El usuario recibido no puede ser nulo en todos su campos");
         }
+
+        // Regla de negocio: Ningún usuario nuevo puede crearse con saldo inicial.
+        // Se fuerza estrictamente a cero ignorando o sobrescribiendo cualquier monto del payload.
+        usuario.setSaldo(BigDecimal.ZERO);
 
         Usuario usuarioValidado = validacionesUsuario(usuario, null); // Falta validacion de usuarios con mismo correo
 
@@ -81,6 +87,17 @@ public class UsuarioUseCase {
         }
 
         if (Boolean.TRUE.equals(encrypterGateway.checkPass(pass, usuarioPorAutenticar.getPass()))){
+            try {
+                String mensaje = "Hola " + usuarioPorAutenticar.getNombre()
+                        + ", se ha registrado un inicio de sesión exitoso en su cuenta de E-commerce.";
+                notificacionGateway.enviarNotificacion(
+                        usuarioPorAutenticar.getEmail(),
+                        usuarioPorAutenticar.getNumeroTelefono(),
+                        mensaje
+                );
+            } catch (Exception e) {
+                // Resiliencia: fallo en la notificación no debe impedir el login exitoso
+            }
             return "Autenticado como " + usuarioPorAutenticar.getNombre();
         } else {
             return "Credenciales Invalidas";
@@ -100,6 +117,10 @@ public class UsuarioUseCase {
         Usuario usuarioExistente = usuarioGateway.buscarPorId(usuario.getIdUsuario());
         if (usuarioExistente == null) {
             throw new RecursoNoEncontradoException("No se puede actualizar. Usuario no encontrado.");
+        }
+
+        if (usuario.getSaldo() == null) {
+            usuario.setSaldo(usuarioExistente.getSaldo());
         }
 
         Usuario usuarioValidado = validacionesUsuario(usuario, usuario.getIdUsuario());

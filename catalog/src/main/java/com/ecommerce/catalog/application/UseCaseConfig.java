@@ -1,6 +1,7 @@
 package com.ecommerce.catalog.application;
 
 import com.ecommerce.catalog.domain.model.gateway.CarritoGateway;
+import com.ecommerce.catalog.domain.model.gateway.NotificacionGateway;
 import com.ecommerce.catalog.domain.model.gateway.ProductoGateway;
 import com.ecommerce.catalog.domain.model.gateway.UsuarioAuthGateway;
 import com.ecommerce.catalog.domain.usecase.CarritoUseCase;
@@ -19,7 +20,8 @@ public class UseCaseConfig {
     @Bean
     public CarritoUseCase carritoUseCase(CarritoGateway carritoGateway,
                                          ProductoGateway productoGateway,
-                                         UsuarioAuthGateway usuarioAuthGateway) {
-        return new CarritoUseCase(carritoGateway, productoGateway, usuarioAuthGateway);
+                                         UsuarioAuthGateway usuarioAuthGateway,
+                                         NotificacionGateway notificacionGateway) {
+        return new CarritoUseCase(carritoGateway, productoGateway, usuarioAuthGateway, notificacionGateway);
     }
 }

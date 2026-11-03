@@ -2,14 +2,18 @@ package com.ecommerce.catalog.infrastructure.driver_adapters.feign;
 
 import com.ecommerce.catalog.domain.exception.RecursoNoEncontradoException;
 import com.ecommerce.catalog.domain.exception.ReglaNegocioException;
+import com.ecommerce.catalog.domain.model.UsuarioContacto;
 import com.ecommerce.catalog.domain.model.gateway.UsuarioAuthGateway;
 import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.DescontarSaldoDTO;
+import com.ecommerce.catalog.infrastructure.driver_adapters.feign.dto.UsuarioContactoDTO;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
@@ -56,6 +60,20 @@ public class UsuarioAuthGatewayImpl implements UsuarioAuthGateway {
             throw new ReglaNegocioException(extraerMensaje(e, "No fue posible descontar el saldo del usuario"));
         } catch (FeignException e) {
             throw new ReglaNegocioException("Error al comunicarse con el servicio de autenticación: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public UsuarioContacto obtenerContactoUsuario(String idUsuario) {
+        try {
+            UsuarioContactoDTO dto = usuarioAuthFeignClient.obtenerContacto(idUsuario);
+            if (dto == null) {
+                return null;
+            }
+            return new UsuarioContacto(dto.nombre(), dto.email(), dto.telefono());
+        } catch (Exception e) {
+            log.error("Fallo al obtener datos de contacto para usuario {}: {}", idUsuario, e.getMessage());
+            return null;
         }
     }
 
